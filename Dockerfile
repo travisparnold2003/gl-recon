@@ -40,7 +40,7 @@ COPY --from=builder /app/data ./data
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
 
-RUN chmod +x ./entrypoint.sh
+RUN sed -i 's/\r$//' ./entrypoint.sh && chmod +x ./entrypoint.sh
 
 EXPOSE 3000
 
