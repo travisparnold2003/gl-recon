@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package glrecon.v1;
+
+message Money {
+  string currency = 1;
+  int64 minor_units = 2;
+}
+
+message GLTransaction {
+  int64 id = 1;
+  string transaction_id = 2;
+  string date = 3;
+  string account_code = 4;
+  string account_name = 5;
+  string description = 6;
+  Money amount = 7;
+  string status = 8;
+}
+
+message BankTransaction {
+  int64 id = 1;
+  string bank_ref = 2;
+  string date = 3;
+  string description = 4;
+  Money amount = 5;
+  string status = 6;
+}
+
+message ReconcileRequest {}
+
+message ReconcileResponse {
+  int32 matched = 1;
+  int32 proposed = 2;
+  int32 llm_proposed = 3;
+}
+
+message DashboardStats {
+  int32 total_gl = 1;
+  int32 total_bank = 2;
+  int32 matched = 3;
+  int32 proposed = 4;
+  int32 gl_exceptions = 5;
+  int32 bank_exceptions = 6;
+  int32 journals = 7;
+  int32 pending_gl = 8;
+  int32 pending_bank = 9;
+}
+
+message DashboardResponse {
+  DashboardStats stats = 1;
+  repeated GLTransaction gl_exceptions = 2;
+  repeated BankTransaction bank_exceptions = 3;
+}
+
+service ReconciliationService {
+  rpc Reconcile(ReconcileRequest) returns (ReconcileResponse);
+}

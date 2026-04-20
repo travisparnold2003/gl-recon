@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MatchStatus {
+  PENDING
+  MATCHED
+  PROPOSED
+  EXCEPTION
+}
+
+model GLTransaction {
+  id             Int         @id @default(autoincrement())
+  transactionId  String      @unique
+  date           DateTime
+  accountCode    String
+  accountName    String
+  description    String
+  debit          Decimal     @db.Decimal(14, 2)
+  credit         Decimal     @db.Decimal(14, 2)
+  netAmount      Decimal     @db.Decimal(14, 2)
+  currency       String      @default("GBP")
+  reference      String      @default("")
+  status         MatchStatus @default(PENDING)
+  matchedBankRef String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model BankTransaction {
+  id            Int         @id @default(autoincrement())
+  bankRef       String      @unique
+  date          DateTime
+  description   String
+  amount        Decimal     @db.Decimal(14, 2)
+  transactionType String    @default("credit")
+  status        MatchStatus @default(PENDING)
+  matchedGlRef  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model JournalEntry {
+  id            Int      @id @default(autoincrement())
+  date          DateTime
+  description   String
+  debitAccount  String
+  creditAccount String
+  amount        Decimal  @db.Decimal(14, 2)
+  reference     String   @default("")
+  createdAt     DateTime @default(now())
+}
+
+model MatchInsight {
+  id         Int      @id @default(autoincrement())
+  glId       Int?
+  bankId     Int?
+  passType   String
+  confidence Int
+  reasoning  String
+  createdAt  DateTime @default(now())
+
+  @@index([glId, bankId])
+}
+
+model AuditEvent {
+  id         Int      @id @default(autoincrement())
+  eventType  String
+  actor      String   @default("system")
+  message    String
+  detailsJson String  @default("{}")
+  createdAt  DateTime @default(now())
+}
+
+model AppSetting {
+  id           Int      @id @default(autoincrement())
+  settingKey   String   @unique
+  settingValue String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DataSource {
+  id               Int      @id @default(autoincrement())
+  sourceKey        String   @unique
+  name             String
+  sourceType       String   @default("connector")
+  connectionStatus String   @default("disconnected")
+  lastSyncAt       DateTime?
+  rowCount         Int      @default(0)
+  location         String   @default("")
+  mode             String   @default("")
+  detailsJson      String   @default("{}")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ExceptionExplanation {
+  id            Int      @id @default(autoincrement())
+  sourceType    String
+  itemId        Int
+  provider      String   @default("")
+  model         String   @default("")
+  structuredJson String  @default("{}")
+  editedText    String   @default("")
+  updatedBy     String   @default("system")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([sourceType, itemId])
+}

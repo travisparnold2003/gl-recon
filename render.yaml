@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: gl-recon
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- --port $PORT
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: nvidia/llama-3.1-nemotron-70b-instruct:free
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false

@@ -1,0 +1,23 @@
+transaction_id,date,account_code,account_name,description,debit,credit,currency,reference
+TXN-001,2026-03-01,1000,Cash – Main,Invoice payment – Spotify,15000.00,0,GBP,INV-0891
+TXN-002,2026-03-02,1000,Cash – Main,AWS – March subscription,0,2340.00,GBP,AWS-MAR-26
+TXN-003,2026-03-04,1000,Cash – Main,Payroll batch – March,0,45200.00,GBP,PAY-MAR-26
+TXN-004,2026-03-05,1000,Cash – Main,Epidemic Sound payment,22000.00,0,GBP,ES-INV-0034
+TXN-005,2026-03-07,1000,Cash – Main,Office rent – March,0,3500.00,GBP,RENT-MAR-26
+TXN-006,2026-03-08,1000,Cash – Main,Stripe refund,0,250.00,GBP,STR-REF-01
+TXN-007,2026-03-10,1000,Cash – Main,Internal transfer to savings,0,50000.00,GBP,INT-XFER-001
+TXN-008,2026-03-12,1000,Cash – Main,Yoto Ltd – Invoice 0021,9750.00,0,GBP,YOTO-0021
+TXN-009,2026-03-15,1000,Cash – Main,LinkedIn Ads – March,0,1200.00,GBP,LI-ADS-MAR
+TXN-010,2026-03-18,1000,Cash – Main,HMRC VAT – Q1 2026,0,8900.00,GBP,HMRC-VAT-Q1
+TXN-011,2026-03-20,1000,Cash – Main,Bumper Automotive – Inv 0018,6600.00,0,GBP,BMP-0018
+TXN-012,2026-03-28,1000,Cash – Main,Notion + Figma subscriptions,0,480.00,GBP,SOFT-MAR-26
+TXN-013,2026-03-29,1000,Cash – Main,Volt Technologies – Inv 0009,4200.00,0,GBP,VLT-0009
+TXN-014,2026-03-31,1000,Cash – Main,Accrual reversal – March,0,1500.00,GBP,ACR-MAR-26
+TXN-015,2026-03-01,1000,Cash – Main,SoundCloud – Inv 0412,8500.00,0,GBP,SC-0412
+TXN-016,2026-03-03,1000,Cash – Main,Pandora Media – Inv 0215,12750.00,0,GBP,PAN-0215
+TXN-017,2026-03-06,1000,Cash – Main,Adobe Creative Cloud renewal,0,675.00,GBP,ADOBE-MAR-26
+TXN-018,2026-03-11,1000,Cash – Main,Travel expenses reimbursement,0,2800.00,GBP,EXP-MAR-26
+TXN-019,2026-03-22,1000,Cash – Main,Motorway Group – Inv 1104,31000.00,0,GBP,MTW-1104
+TXN-020,2026-03-25,1000,Cash – Main,Google Ads – March,0,5600.00,GBP,GADS-MAR-26
+TXN-021,2026-03-28,1000,Cash – Main,Beatport – Inv 0077,7500.00,0,GBP,BP-0077
+TXN-022,2026-03-31,1000,Cash – Main,Expense claim – S. Clarke,0,3200.00,GBP,EXP-SC-MAR
