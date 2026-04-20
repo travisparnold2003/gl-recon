@@ -45,6 +45,13 @@ export function ReconciliationView({
 }: Props) {
   const { proposedPairs, glExceptions, bankExceptions, matchedPairs } = dashboard;
 
+  function providerLabel(provider: string | undefined, model: string | undefined): string {
+    if (!provider || provider === "manual") return "Manual note";
+    if (provider === "rule-fallback") return "Rules-based (no OpenRouter key set)";
+    if (provider === "openrouter") return `AI via OpenRouter${model ? ` · ${model}` : ""}`;
+    return provider;
+  }
+
   return (
     <section className="panel">
       <div className="tabs">
@@ -159,7 +166,7 @@ export function ReconciliationView({
                     {expanded && (
                       <div className="explanation-box compact">
                         <div className="explanation-meta">
-                          Provider: {explanation?.provider || "manual"}{explanation?.model ? ` (${explanation.model})` : ""}
+                          {providerLabel(explanation?.provider, explanation?.model)}
                         </div>
                         <textarea
                           value={explanationDrafts[key] || ""}
@@ -216,7 +223,7 @@ export function ReconciliationView({
                     {expanded && (
                       <div className="explanation-box compact">
                         <div className="explanation-meta">
-                          Provider: {explanation?.provider || "manual"}{explanation?.model ? ` (${explanation.model})` : ""}
+                          {providerLabel(explanation?.provider, explanation?.model)}
                         </div>
                         <textarea
                           value={explanationDrafts[key] || ""}

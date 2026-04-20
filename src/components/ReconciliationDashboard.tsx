@@ -61,7 +61,7 @@ export function ReconciliationDashboard() {
   const [loadingWorkspace, setLoadingWorkspace] = useState(true);
   const [workspaceError, setWorkspaceError] = useState("");
 
-  const [apiTokenInput, setApiTokenInput] = useState("");
+  const [apiTokenInput, setApiTokenInput] = useState("demo");
   const [selectedSourceKey, setSelectedSourceKey] = useState("google_sheets");
   const [showSettings, setShowSettings] = useState(false);
 

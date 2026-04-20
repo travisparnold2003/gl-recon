@@ -477,6 +477,16 @@ function explanationToText(structured: Record<string, unknown>): string {
   ].join("\n");
 }
 
+function sanitizeUnstructuredAiText(raw: string): string {
+  return raw
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\b(return|output)\s+strict\s+json[^.]*\.?/gi, " ")
+    .replace(/\bwe\s+need\s+to\s+(produce|output)[^.]*\.?/gi, " ")
+    .replace(/\bkeys?\s*:[^.]*\.?/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function explainException(sourceType: "gl" | "bank", itemId: number): Promise<Record<string, unknown>> {
   const settings = await getSettingsPayload();
   const openRouterApiKey = settings.openrouter_api_key?.trim() || process.env.OPENROUTER_API_KEY?.trim() || "";
@@ -509,14 +519,25 @@ export async function explainException(sourceType: "gl" | "bank", itemId: number
     opposite = await prisma.gLTransaction.findMany({ orderBy: { id: "desc" }, take: 8 });
   }
 
-  const fallbackStructured = normalizeExplanation({
-    summary: `No AI key configured; generated rules-based explanation for ${txRef}.`,
-    likely_causes: ["Timing differences across systems", "Missing or inconsistent transaction references"],
-    recommended_actions: ["Check supporting documents", "Confirm amount/date mapping before posting journal"],
-    risk_level: "medium",
-    confidence: 45,
-    journal_note: `Rules fallback review for ${txRef} (${Math.abs(txAmount).toFixed(2)}).`
-  }, txRef);
+  function rulesFallback(reason: "no-key" | "no-response" | "invalid-json"): Record<string, unknown> {
+    const reasonSummary =
+      reason === "no-key"
+        ? `No AI key configured; generated rules-based explanation for ${txRef}.`
+        : reason === "no-response"
+          ? `OpenRouter did not return a response; generated rules-based explanation for ${txRef}.`
+          : `OpenRouter response could not be parsed; generated rules-based explanation for ${txRef}.`;
+
+    return normalizeExplanation({
+      summary: reasonSummary,
+      likely_causes: ["Timing differences across systems", "Missing or inconsistent transaction references"],
+      recommended_actions: ["Check supporting documents", "Confirm amount/date mapping before posting journal"],
+      risk_level: "medium",
+      confidence: 45,
+      journal_note: `Rules fallback review for ${txRef} (${Math.abs(txAmount).toFixed(2)}).`
+    }, txRef);
+  }
+
+  const fallbackStructured = rulesFallback("no-key");
 
   let provider = "rule-fallback";
   let model = "";
@@ -543,9 +564,37 @@ export async function explainException(sourceType: "gl" | "bank", itemId: number
     });
 
     if (content) {
-      provider = "openrouter";
-      model = openRouterModel;
-      structured = normalizeExplanation(extractJsonObject(content), txRef);
+      const parsed = extractJsonObject(content);
+      const hasExpectedKeys = ["summary", "likely_causes", "recommended_actions", "risk_level", "confidence", "journal_note"]
+        .some((key) => parsed[key] !== undefined);
+
+      if (hasExpectedKeys) {
+        provider = "openrouter";
+        model = openRouterModel;
+        structured = normalizeExplanation(parsed, txRef);
+      } else {
+        const condensed = sanitizeUnstructuredAiText(content).slice(0, 420);
+        provider = "openrouter";
+        model = openRouterModel;
+        structured = normalizeExplanation({
+          summary: `AI returned an unstructured response; summarized for ${txRef}.`,
+          likely_causes: [
+            "Model did not return strict JSON for this request",
+            condensed
+              ? "AI response arrived in free-form text and could not be fully structured"
+              : "AI response did not contain extractable structured fields"
+          ],
+          recommended_actions: [
+            "Review AI note and supporting source documents",
+            "Confirm amount/date/reference consistency before journal posting"
+          ],
+          risk_level: "medium",
+          confidence: 60,
+          journal_note: `AI returned a free-form explanation for ${txRef}; review source evidence before posting journal.`
+        }, txRef);
+      }
+    } else {
+      structured = rulesFallback("no-response");
     }
   }
 
@@ -576,7 +625,7 @@ export async function explainException(sourceType: "gl" | "bank", itemId: number
     }
   });
 
-  await logAudit("explain_exception", "Generated AI explanation for exception", { sourceType, itemId, provider });
+  await logAudit("explain_exception", "Generated exception explanation", { sourceType, itemId, provider, model });
 
   return {
     source_type: sourceType,

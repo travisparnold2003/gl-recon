@@ -46,6 +46,24 @@ export async function ensureSeeded() {
     const seeded = await loadSampleData();
     await logEvent("startup", "Loaded sample data", seeded);
   }
+
+  const [glCount, bankCount] = await Promise.all([
+    prisma.gLTransaction.count(),
+    prisma.bankTransaction.count()
+  ]);
+
+  if (glCount > 0) {
+    await prisma.dataSource.updateMany({
+      where: { sourceKey: { in: ["erp_system", "netsuite_mock"] } },
+      data: { connectionStatus: "connected", rowCount: glCount, lastSyncAt: new Date() }
+    });
+  }
+  if (bankCount > 0) {
+    await prisma.dataSource.updateMany({
+      where: { sourceKey: "bank_feed" },
+      data: { connectionStatus: "connected", rowCount: bankCount, lastSyncAt: new Date() }
+    });
+  }
 }
 
 export async function getHealthPayload() {
